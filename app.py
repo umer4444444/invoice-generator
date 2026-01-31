@@ -8,6 +8,7 @@ import os
 import threading
 import time
 from datetime import datetime, timedelta
+import tempfile
 
 try:
     import cairosvg
@@ -18,8 +19,19 @@ except Exception as e:
     cairosvg = None
 
 app = Flask(__name__)
-app.config['UPLOAD_FOLDER'] = 'uploads'
-app.config['OUTPUT_FOLDER'] = 'output'
+
+# Check if running on Vercel or similar serverless env
+IS_VERCEL = "VERCEL" in os.environ
+
+if IS_VERCEL:
+    # Vercel's writable directory
+    BASE_TEMP = "/tmp"
+    app.config['UPLOAD_FOLDER'] = os.path.join(BASE_TEMP, 'uploads')
+    app.config['OUTPUT_FOLDER'] = os.path.join(BASE_TEMP, 'output')
+else:
+    app.config['UPLOAD_FOLDER'] = 'uploads'
+    app.config['OUTPUT_FOLDER'] = 'output'
+
 app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024
 
 # Ensure necessary directories exist
@@ -38,6 +50,7 @@ def cleanup_old_files():
         try:
             current_time = datetime.now()
             for folder in [app.config['OUTPUT_FOLDER'], app.config['UPLOAD_FOLDER']]:
+                if not os.path.exists(folder): continue
                 for filename in os.listdir(folder):
                     filepath = os.path.join(folder, filename)
                     if os.path.isfile(filepath):
@@ -198,7 +211,7 @@ def create_invoice_pdf(data, logo_path, output_filename):
             total_raw = data.get(f"product_total_{idx}", "0").replace('$', '').replace(',', '').strip()
             
             # Draw dividers
-            cols_x = [40, 70, 320, 390, 440, 490, 535, 580] # Adjusted
+            cols_x = [40, 70, 320, 390, 440, 490, 535, 580]
             for i in range(len(cols_x) - 1):
                 c.rect(cols_x[i], curr_y, cols_x[i+1] - cols_x[i], 30, stroke=1)
             
@@ -310,7 +323,8 @@ def generate_invoice():
             except: pass
 
 if __name__ == '__main__':
-    start_cleanup_thread()
-    # Use environment variable for port if available (needed for hostings like Render)
-    port = int(os.environ.get("PORT", 5000))
-    app.run(debug=False, host='0.0.0.0', port=port)
+    # Cleanup thread only needed for persistent servers
+    if not IS_VERCEL:
+        start_cleanup_thread()
+        port = int(os.environ.get("PORT", 5000))
+        app.run(debug=False, host='0.0.0.0', port=port)
