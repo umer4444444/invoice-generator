@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Premium Invoice Template</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/invoice_style.css') }}">
+    <!-- Google Fonts for premium look -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;800&display=swap" rel="stylesheet">
+</head>
+<body>
+
+    <!-- Configuration Sidebar -->
+    <div class="sidebar">
+        <h2>Customize Invoice</h2>
+        
+        <div class="control-group">
+            <label for="primaryColor">Primary Color (Accent)</label>
+            <input type="color" id="primaryColor" class="color-input" value="#f7a80a">
+        </div>
+        
+        <div class="control-group">
+            <label for="secondaryColor">Secondary Color (Text/Bars)</label>
+            <input type="color" id="secondaryColor" class="color-input" value="#2d2d2d">
+        </div>
+
+        <p style="font-size: 0.75rem; color: #666; margin-top: 20px;">
+            ⚠️ <strong>Pro Tip:</strong> Click on any text in the invoice to edit it directly!
+        </p>
+
+        <button class="btn-print" onclick="printInvoice()">Print / Save as PDF</button>
+        <button class="btn-print" style="background: #eee; color: #333; margin-top: 10px;" onclick="window.location.href='/'">Back to Generator</button>
+    </div>
+
+    <!-- Invoice Sheet -->
+    <div class="invoice-page" id="invoiceSheet">
+        <div class="top-bar"></div>
+        <div class="top-accent"></div>
+
+        <header>
+            <div class="company-logo-text" contenteditable="true">
+                <span class="primary">Lancers</span> <span class="secondary">Tech</span>
+            </div>
+            <div class="company-info" contenteditable="true">
+                <h3>Lancers Tech PVT LTD</h3>
+                <p>9A Tariq Block Canal Bank</p>
+                <p>officials@lancerstech.com</p>
+            </div>
+        </header>
+
+        <section class="section">
+            <div class="section-header">Customer Information</div>
+            <div class="info-grid">
+                <div class="info-label">Company</div>
+                <div class="info-value" contenteditable="true">HITEC UNIVERSITY TAXILA</div>
+                
+                <div class="info-label">Phone No</div>
+                <div class="info-value" contenteditable="true">0344-56209835</div>
+                
+                <div class="info-label">Email</div>
+                <div class="info-value" contenteditable="true">waqas.ahmed@hitecuni.edu.pk</div>
+            </div>
+        </section>
+
+        <section class="section">
+            <div class="section-header">Order Details</div>
+            <table class="order-table">
+                <thead>
+                    <tr>
+                        <th class="col-no">No.</th>
+                        <th>Item Description</th>
+                        <th class="col-qty">Qty</th>
+                        <th class="col-price">Price</th>
+                        <th class="col-discount">Discount</th>
+                        <th class="col-total">Total</th>
+                    </tr>
+                </thead>
+                <tbody contenteditable="true">
+                    <tr>
+                        <td class="text-center">1</td>
+                        <td>CYBER SECURITY STUDENT TRAINING</td>
+                        <td class="text-center">53</td>
+                        <td class="text-right">15,000 PKR</td>
+                        <td class="text-right">0 PKR</td>
+                        <td class="text-right">795,000 PKR</td>
+                    </tr>
+                    <tr class="empty-row">
+                        <td></td><td></td><td></td><td></td><td></td><td></td>
+                    </tr>
+                    <tr class="empty-row">
+                        <td></td><td></td><td></td><td></td><td></td><td></td>
+                    </tr>
+                </tbody>
+            </table>
+        </section>
+
+        <section class="section">
+            <div class="totals-container">
+                <table class="totals-table">
+                    <tbody contenteditable="true">
+                        <tr>
+                            <td class="totals-label">GST Tax 5%</td>
+                            <td class="text-right">39,750 PKR</td>
+                        </tr>
+                        <tr class="total-row">
+                            <td class="totals-label" style="background: #eeeeee;">Total</td>
+                            <td class="text-right" style="background: #eeeeee;">834,750 PKR</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <section class="section" style="margin-top: -20px;">
+            <div class="section-header">Delivery Details</div>
+            <div class="delivery-details" contenteditable="true">
+                <table class="delivery-table">
+                    <tr>
+                        <td class="delivery-label">Method</td>
+                        <td>ON-CAMPUS TRAINING</td>
+                    </tr>
+                    <tr>
+                        <td class="delivery-label">Date</td>
+                        <td>10 OCT, 2025</td>
+                    </tr>
+                </table>
+            </div>
+        </section>
+
+        <div class="footer-section">
+            <div><!-- Empty for spacing --></div>
+            <div class="signature-area" contenteditable="true">
+                <p class="signature-name">CH.Shahrukh Farooq</p>
+                <p class="signature-title">C.E.O</p>
+            </div>
+        </div>
+
+        <div class="contact-bar" contenteditable="true">
+            <div class="contact-item">📧 officials@lancerstech.com</div>
+            <div class="contact-item">🌐 www.lancerstech.com</div>
+        </div>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/invoice_script.js') }}"></script>
+</body>
+</html>

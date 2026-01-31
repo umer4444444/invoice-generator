@@ -1,0 +1,637 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Invoice Generator</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #00C3E3 0%, #0066cc 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #2d2d2d 0%, #000000 100%);
+            color: white;
+            padding: 40px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.8em;
+            margin-bottom: 10px;
+            font-weight: 800;
+        }
+
+        .header h1 span.accent {
+            color: #f7a80a;
+        }
+
+        .header p {
+            font-size: 1.1em;
+            opacity: 0.8;
+            letter-spacing: 1px;
+        }
+
+        .form-container {
+            padding: 40px;
+        }
+
+        .section {
+            margin-bottom: 40px;
+        }
+
+        .section-title {
+            font-size: 1.5em;
+            color: #00C3E3;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 3px solid #00C3E3;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .form-group label {
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 8px;
+            font-size: 0.95em;
+        }
+
+        .form-group input,
+        .form-group textarea,
+        .form-group select {
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 1em;
+            transition: all 0.3s;
+        }
+
+        .form-group input:focus,
+        .form-group textarea:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: #00C3E3;
+            box-shadow: 0 0 0 3px rgba(0, 195, 227, 0.1);
+        }
+
+        .logo-upload {
+            border: 3px dashed #00C3E3;
+            border-radius: 12px;
+            padding: 30px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            background: #f0f9ff;
+        }
+
+        .logo-upload:hover {
+            background: #e0f4ff;
+            border-color: #0066cc;
+        }
+
+        .logo-upload input[type="file"] {
+            display: none;
+        }
+
+        .logo-preview {
+            margin-top: 15px;
+            max-width: 200px;
+            max-height: 200px;
+            display: none;
+            margin-left: auto;
+            margin-right: auto;
+            border-radius: 8px;
+        }
+
+        .products-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        .products-table th,
+        .products-table td {
+            padding: 12px;
+            border: 1px solid #e0e0e0;
+            text-align: left;
+        }
+
+        .products-table th {
+            background: #00C3E3;
+            color: white;
+            font-weight: 600;
+        }
+
+        .products-table input {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #e0e0e0;
+            border-radius: 4px;
+        }
+
+        .products-table input:focus {
+            outline: none;
+            border-color: #00C3E3;
+        }
+
+        .btn {
+            padding: 12px 30px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin: 5px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #00C3E3 0%, #0066cc 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(0, 195, 227, 0.3);
+        }
+
+        .btn-secondary {
+            background: #e0e0e0;
+            color: #333;
+        }
+
+        .btn-secondary:hover {
+            background: #d0d0d0;
+        }
+
+        .btn-container {
+            text-align: center;
+            margin-top: 40px;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 20px;
+        }
+
+        .loading-spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #00C3E3;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto;
+        }
+
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        .alert {
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            display: none;
+        }
+
+        .alert-success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .alert-error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .remove-row {
+            background: #ff4757;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            padding: 5px 10px;
+            cursor: pointer;
+            font-size: 12px;
+        }
+
+        .remove-row:hover {
+            background: #ff3742;
+        }
+
+        .payment-info {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="header">
+            <h1><span class="accent">Invoice</span> Generator</h1>
+            <p>Professional Branding • Express Layout • PDF Ready</p>
+        </div>
+
+        <div class="form-container">
+            <div id="alert" class="alert"></div>
+
+            <form id="invoiceForm" enctype="multipart/form-data">
+                <!-- Logo Upload Section -->
+                <div class="section">
+                    <h2 class="section-title">📸 Upload Company Logo</h2>
+                    <div class="logo-upload" onclick="document.getElementById('logoInput').click()">
+                        <input type="file" id="logoInput" name="logo" accept="image/*">
+                        <p style="font-size: 3em; margin-bottom: 10px;">📤</p>
+                        <p style="font-weight: 600; color: #00C3E3;">Click to upload logo</p>
+                        <p style="font-size: 0.9em; color: #666; margin-top: 5px;">SVG, PNG, JPG, JPEG (Max 16MB)</p>
+                        <img id="logoPreview" class="logo-preview" src="" alt="Logo Preview">
+                    </div>
+                </div>
+
+                <!-- Brand Expression Section -->
+                <div class="section">
+                    <h2 class="section-title">🎨 Brand Expression</h2>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label>Primary Color (Accent)</label>
+                            <input type="color" name="primary_color" id="primaryColor" value="#00C3E3"
+                                onchange="updateTheme()">
+                        </div>
+                        <div class="form-group">
+                            <label>Secondary Color (Text/Bars)</label>
+                            <input type="color" name="secondary_color" id="secondaryColor" value="#333333"
+                                onchange="updateTheme()">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Company Details Section -->
+                <div class="section">
+                    <h2 class="section-title">🏢 Company Details</h2>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label>Company Name *</label>
+                            <input type="text" name="company_name" placeholder="Ak Wholesale" value="Ak Wholesale"
+                                required>
+                        </div>
+                        <div class="form-group">
+                            <label>Company Type</label>
+                            <input type="text" name="company_type" placeholder="Distributing L.L.C"
+                                value="Distributing L.L.C">
+                        </div>
+                        <div class="form-group">
+                            <label>Address *</label>
+                            <input type="text" name="company_address" placeholder="8774 Fawn Trail Conroe TX 77385"
+                                value="8774 Fawn Trail Conroe TX 77385" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Email *</label>
+                            <input type="email" name="company_email" placeholder="akwholesalellc@gmail.com"
+                                value="akwholesalellc@gmail.com" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Phone Number *</label>
+                            <input type="tel" name="company_phone" placeholder="(936) 224-7946" value="(936) 224-7946"
+                                required>
+                        </div>
+                        <div class="form-group">
+                            <label>Contact Person</label>
+                            <input type="text" name="contact_person" placeholder="Sales Manager" value="Sales Manager">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Client Details Section -->
+                <div class="section">
+                    <h2 class="section-title">👤 Client Details</h2>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label>Client Name *</label>
+                            <input type="text" name="client_name" placeholder="Global Selling 001"
+                                value="Global Selling 001" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Contact Person</label>
+                            <input type="text" name="client_contact" placeholder="Muhammad Ahmad Moeen"
+                                value="Muhammad Ahmad Moeen">
+                        </div>
+                        <div class="form-group">
+                            <label>Address *</label>
+                            <input type="text" name="client_address"
+                                placeholder="21503 Tatton Crest Ct Spring Texas 77388"
+                                value="21503 Tatton Crest Ct Spring Texas 77388" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Email *</label>
+                            <input type="email" name="client_email" placeholder="muhammadahmadmoeen@gmail.com"
+                                value="muhammadahmadmoeen@gmail.com" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Phone Number *</label>
+                            <input type="tel" name="client_phone" placeholder="(281) 736-7985" value="(281) 736-7985"
+                                required>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Invoice Details Section -->
+                <div class="section">
+                    <h2 class="section-title">📋 Invoice Details</h2>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label>Invoice Number *</label>
+                            <input type="text" name="invoice_number" placeholder="2F6303" value="2F6303" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Invoice Date *</label>
+                            <input type="text" name="invoice_date" placeholder="01-10-2025" value="01-10-2025" required>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Products Section -->
+                <div class="section">
+                    <h2 class="section-title">📦 Products & Services</h2>
+                    <table class="products-table" id="productsTable">
+                        <thead>
+                            <tr>
+                                <th>Product/Service Description</th>
+                                <th>Price ($)</th>
+                                <th>Quantity</th>
+                                <th>Total ($)</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="productsBody">
+                            <tr>
+                                <td><input type="text" name="product_name_0" placeholder="Can-Am Drive belt 422280367"
+                                        value="Can-Am Drive belt 422280367"></td>
+                                <td><input type="number" name="product_price_0" placeholder="90.00" value="90.00"
+                                        step="0.01" onchange="calculateTotal(this)"></td>
+                                <td><input type="number" name="product_quantity_0" placeholder="30" value="30"
+                                        onchange="calculateTotal(this)"></td>
+                                <td><input type="text" name="product_total_0" placeholder="2700.00$" value="2700.00$"
+                                        readonly></td>
+                                <td><button type="button" class="remove-row"
+                                        onclick="removeProductRow(this)">Remove</button></td>
+                            </tr>
+                            <tr>
+                                <td><input type="text" name="product_name_1" placeholder="Can-Am Drive belt 422280366"
+                                        value="Can-Am Drive belt 422280366"></td>
+                                <td><input type="number" name="product_price_1" placeholder="90.00" value="90.00"
+                                        step="0.01" onchange="calculateTotal(this)"></td>
+                                <td><input type="number" name="product_quantity_1" placeholder="30" value="30"
+                                        onchange="calculateTotal(this)"></td>
+                                <td><input type="text" name="product_total_1" placeholder="2700.00$" value="2700.00$"
+                                        readonly></td>
+                                <td><button type="button" class="remove-row"
+                                        onclick="removeProductRow(this)">Remove</button></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <div style="margin-top: 15px;">
+                        <button type="button" class="btn btn-secondary" onclick="addProductRow()">+ Add Product</button>
+                    </div>
+                </div>
+
+                <!-- Payment Information -->
+                <div class="section">
+                    <h2 class="section-title">💰 Payment Information</h2>
+                    <div class="payment-info">
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label>Routing Number</label>
+                                <input type="text" name="routing_number" placeholder="031100209" value="031100209">
+                            </div>
+                            <div class="form-group">
+                                <label>Account Number</label>
+                                <input type="text" name="account_number" placeholder="705886401507047"
+                                    value="705886401507047">
+                            </div>
+                            <div class="form-group">
+                                <label>Account Holder Name</label>
+                                <input type="text" name="account_holder" placeholder="Ak Wholesale Distributor LLC"
+                                    value="Ak Wholesale Distributor LLC">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Summary Section -->
+                <div class="section">
+                    <h2 class="section-title">🧮 Summary</h2>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label>Subtotal ($)</label>
+                            <input type="text" name="subtotal" placeholder="5400.00" value="5400.00" readonly>
+                        </div>
+                        <div class="form-group">
+                            <label>Tax ($)</label>
+                            <input type="text" name="tax" placeholder="0" value="0" readonly>
+                        </div>
+                        <div class="form-group">
+                            <label>Total Amount ($)</label>
+                            <input type="text" name="total_amount" placeholder="5400.00" value="5400.00" readonly>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Submit Section -->
+                <div class="btn-container">
+                    <button type="submit" class="btn btn-primary">🎉 Generate Invoice PDF</button>
+                </div>
+
+                <div class="loading" id="loading">
+                    <div class="loading-spinner"></div>
+                    <p style="margin-top: 15px; color: #00C3E3; font-weight: 600;">Generating your invoice PDF...</p>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        function updateTheme() {
+            const primary = document.getElementById('primaryColor').value;
+            const secondary = document.getElementById('secondaryColor').value;
+
+            // Update UI colors dynamically
+            document.querySelectorAll('.section-title').forEach(el => {
+                el.style.color = primary;
+                el.style.borderBottomColor = primary;
+            });
+            document.querySelectorAll('.products-table th').forEach(el => {
+                el.style.background = primary;
+            });
+            document.querySelectorAll('.btn-primary').forEach(el => {
+                el.style.background = `linear-gradient(135deg, ${primary} 0%, ${secondary} 100%)`;
+            });
+
+            const accent = document.querySelector('.header h1 span.accent');
+            if (accent) accent.style.color = primary;
+
+            const header = document.querySelector('.header');
+            if (header) header.style.background = `linear-gradient(135deg, ${secondary} 0%, #000000 100%)`;
+        }
+        let productCount = 2; // Starting from 2 since we have 2 default rows
+
+        // Logo preview
+        document.getElementById('logoInput').addEventListener('change', function (e) {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function (e) {
+                    const preview = document.getElementById('logoPreview');
+                    preview.src = e.target.result;
+                    preview.style.display = 'block';
+                }
+                reader.readAsDataURL(file);
+            }
+        });
+
+        // Add product row
+        function addProductRow() {
+            const tbody = document.getElementById('productsBody');
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                <td><input type="text" name="product_name_${productCount}" placeholder="Product/Service description"></td>
+                <td><input type="number" name="product_price_${productCount}" placeholder="0.00" step="0.01" onchange="calculateTotal(this)"></td>
+                <td><input type="number" name="product_quantity_${productCount}" placeholder="0" onchange="calculateTotal(this)"></td>
+                <td><input type="text" name="product_total_${productCount}" placeholder="0.00$" readonly></td>
+                <td><button type="button" class="remove-row" onclick="removeProductRow(this)">Remove</button></td>
+            `;
+            tbody.appendChild(row);
+            productCount++;
+        }
+
+        // Remove product row
+        function removeProductRow(button) {
+            const row = button.closest('tr');
+            if (document.querySelectorAll('#productsBody tr').length > 1) {
+                row.remove();
+                calculateGrandTotal();
+            } else {
+                alert("You need to have at least one product row.");
+            }
+        }
+
+        // Calculate total for a product row
+        function calculateTotal(input) {
+            const row = input.closest('tr');
+            const price = parseFloat(row.querySelector('input[name^="product_price"]').value) || 0;
+            const quantity = parseInt(row.querySelector('input[name^="product_quantity"]').value) || 0;
+            const total = price * quantity;
+
+            const totalInput = row.querySelector('input[name^="product_total"]');
+            totalInput.value = total.toFixed(2) + '$';
+
+            calculateGrandTotal();
+        }
+
+        // Calculate grand total
+        function calculateGrandTotal() {
+            let subtotal = 0;
+            const totalInputs = document.querySelectorAll('input[name^="product_total"]');
+
+            totalInputs.forEach(input => {
+                const value = parseFloat(input.value) || 0;
+                subtotal += value;
+            });
+
+            document.querySelector('input[name="subtotal"]').value = subtotal.toFixed(2);
+            document.querySelector('input[name="total_amount"]').value = subtotal.toFixed(2);
+        }
+
+        // Initialize calculations for default rows
+        document.addEventListener('DOMContentLoaded', function () {
+            calculateGrandTotal();
+            updateTheme(); // Initialize theme on load
+        });
+
+        // Form submission
+        document.getElementById('invoiceForm').addEventListener('submit', async function (e) {
+            e.preventDefault();
+
+            const formData = new FormData(this);
+            const loading = document.getElementById('loading');
+            const alert = document.getElementById('alert');
+
+            loading.style.display = 'block';
+            alert.style.display = 'none';
+
+            try {
+                const response = await fetch('/generate-invoice', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                if (response.ok) {
+                    const blob = await response.blob();
+                    const url = window.URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = 'invoice.pdf';
+                    document.body.appendChild(a);
+                    a.click();
+                    window.URL.revokeObjectURL(url);
+                    document.body.removeChild(a);
+
+                    alert.className = 'alert alert-success';
+                    alert.textContent = '✅ Invoice PDF generated successfully!';
+                    alert.style.display = 'block';
+                } else {
+                    throw new Error('Failed to generate PDF');
+                }
+            } catch (error) {
+                alert.className = 'alert alert-error';
+                alert.textContent = '❌ Error: ' + error.message;
+                alert.style.display = 'block';
+            } finally {
+                loading.style.display = 'none';
+            }
+        });
+    </script>
+</body>
+
+</html>
